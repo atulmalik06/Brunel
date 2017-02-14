@@ -1,6 +1,9 @@
 package com.example.atulmalik.brunel;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,40 +48,71 @@ public class Register extends AppCompatActivity {
                 final String name = etNameR.getText().toString();
                 final String email = etEmailR.getText().toString();
                 final String password = etPassR.getText().toString();
+                final String passwordC = etPasscR.getText().toString();
 
-                Response.Listener<String> responseListener = new Response.Listener<String>(){
+                if(name.isEmpty() || name.length()<3){
+                    etNameR.setError("At least 3 character");
+                }
 
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonResponse = new JSONObject(response);
-                            boolean success = jsonResponse.getBoolean("success");
+                if(email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+                    etEmailR.setError("Enter a valid email");
+                }
 
-                            if(success){
-                                Intent intent = new Intent(Register.this, Login.class);
-                                Register.this.startActivity(intent);
+                if(password.length()<4 || password.length()>10){
+                    etPassR.setError("Must be between 4 and 10 characters");
+                }
+                else if (!(password.equals(passwordC))){
+                    etPassR.setError("Passwords do not match");
+                }
+
+
+                else {
+
+                    Response.Listener<String> responseListener = new Response.Listener<String>() {
+
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject jsonResponse = new JSONObject(response);
+                                boolean success = jsonResponse.getBoolean("success");
+
+                                if (success) {
+                                   final ProgressDialog progressDialog = new ProgressDialog(Register.this);
+                                    progressDialog.setIndeterminate(true);
+                                    progressDialog.setMessage("Creating Account...");
+                                    progressDialog.show();
+
+                                    Intent intent = new Intent(Register.this, Login.class);
+                                    Register.this.startActivity(intent);
+
+                               /*       AlertDialog.Builder builder = new AlertDialog.Builder(Login.class);
+                                    builder.setMessage("Sucessfully Registered")
+                                            .setNegativeButton("Login", null)
+                                            .create()
+                                            .show();*/
+
+                                } else {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(Register.this);
+                                    builder.setMessage("Registration Failed")
+                                            .setNegativeButton("Retry", null)
+                                            .create()
+                                            .show();
+
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            else{
-                                AlertDialog.Builder builder = new AlertDialog.Builder(Register.this);
-                                builder.setMessage("Registration Failed")
-                                        .setNegativeButton("Retry", null)
-                                        .create()
-                                        .show();
 
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
+                    };
 
-                    }
-                };
-
-                RegisterRequest registerrequest = new RegisterRequest(name, email, password, responseListener );
-                RequestQueue queue = Volley.newRequestQueue(Register.this);
-                queue.add(registerrequest);
-
+                    RegisterRequest registerrequest = new RegisterRequest(name, email, password, responseListener);
+                    RequestQueue queue = Volley.newRequestQueue(Register.this);
+                    queue.add(registerrequest);
+                }
             }
+
         });
 
     }
