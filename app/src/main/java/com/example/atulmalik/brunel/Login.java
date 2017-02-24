@@ -67,8 +67,8 @@ public class Login extends AppCompatActivity {
                                     String name = jsonRespone.getString("name");
                                    // etEmailL.setText(name);
 
-                                    Intent intent = new Intent(Login.this, Maps.class);
-                                    Login.this.startActivity(intent);
+                                   // Intent intent = new Intent(Login.this, Maps.class);
+                                  //  Login.this.startActivity(intent);
 
                                 } else {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
